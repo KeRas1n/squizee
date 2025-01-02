@@ -1,0 +1,73 @@
+.userlist{
+    z-index: 999;
+    position: fixed;
+    top:30px;
+    left:15px;
+    background-color: rgb(0, 0, 0, 0.5);
+    padding:15px;
+    border-radius: 5px;
+    width: 300px;
+    
+}
+.userlist_content > div{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+    height: 70px;
+    border: 1px solid black;
+    background-color: rgba(49, 49, 49, 0.5);
+
+    padding: 7px;
+}
+
+.green{
+    color:green;
+}
+.red{
+    color:red;
+}
+
+tr{
+    border: 1px solid #dddddd;
+    border-radius: 7px;
+    background-color: rgba(49, 49, 49, 0.5);
+    
+
+}
+td, th {
+    text-align: center;
+    padding: 8px;
+    max-width: 120px;
+    word-wrap: break-word;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+
+    border-collapse: separate;
+    border-spacing:0 5px;
+}
+
+tr:first-child td:first-child { border-top-left-radius: 10px; }
+tr:last-child td:last-child { border-top-right-radius: 10px; }
+
+tr:first-child td:first-child{
+    background-color: red;
+}
+.showScoreboard{
+    z-index: 9999;
+    position: absolute; 
+    top:30px;
+    left:15px;
+    color:white;
+    padding: 10px;
+    background-color: #242424;
+    cursor: pointer;
+    border-radius: 7px;
+}
+.hidden{
+    display: none;
+}
