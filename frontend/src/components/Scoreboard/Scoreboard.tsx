@@ -1,25 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  listenSocketEvent,
-  emitSocketEvent,removeSocketEvent
+  emitSocketEvent
 } from "../../redux/actions/socketActions";
 
 import styles from './Scoreboard.module.css';
-import { roomActions } from "../../redux/slices/room.slice";
+import { RootState } from "../../redux/store"; 
+
+// Define Player type
+interface Player {
+  id: string;
+  name: string;
+  score: number;
+  ready: boolean;
+}
 
 
 const Scoreboard = () => {
-  const users = useSelector((state) => state.room.players);
-  const roomId = useSelector((state) => state.room.roomId);
-  const gameStarted = useSelector((state) => state.room.gameStarted);
+  const users = useSelector((state:RootState) => state.room.players) as Player[];
+  const roomId = useSelector((state:RootState) => state.room.roomId);
+  const gameStarted = useSelector((state:RootState) => state.room.gameStarted) as boolean;
 
   const [showScoreboard, setShowScoreboard] = useState(true);
 
   const dispatch = useDispatch();
   console.log(users)
 
-  const ready = (e) => {
+  const ready = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
 
     dispatch(emitSocketEvent("ready", {room:roomId}));
@@ -60,9 +67,6 @@ const Scoreboard = () => {
         </table>
 
         {!gameStarted ? (<button onClick={(e) => ready(e)}>Ready</button>) : ''}
-
-
-        {/*<div><input type="text" value={`${window.location.href}/?room=${roomId}`}/></div>*/}
         
 
       </div>

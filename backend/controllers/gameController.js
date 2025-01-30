@@ -1,6 +1,31 @@
 const { getQuestionsFromOpenTDB } = require("../services/trivia");
+const { generateRoomKey } = require('../utils/roomKeyGenerator');
 
 let rooms = {};
+
+// Initialize a room with default properties
+const initializeRoom = (overrides = {}) => ({
+    players: {}, // Dictionary of players
+    readyPlayers: 0, 
+    answersCount: 0,
+    maxQuestions: 5, 
+    questionCount: 0, 
+    questions: [], 
+    category: null, 
+    difficulty: null, 
+    currentQuestion: null, 
+    timer: null,
+    ...overrides,
+});
+
+// Initialize a player with default properties
+const initializePlayer = (id, name) => ({
+    id,
+    name, 
+    score: 0, 
+    ready: false,
+    answer: null, 
+});
 
 const updateRoomUsers = (io, room) => {
     if (rooms[room]) {
@@ -10,28 +35,28 @@ const updateRoomUsers = (io, room) => {
 
 const addUserToRoom = (io, socket, room, name) => {
     socket.join(room);
+
     if (!rooms[room]) {
-        rooms[room] = {
-            players: {},
-            readyPlayers: 0,
-            answersCount: 0,
-            maxQuestions: 5,
-            questionCount: 0,
-            questions: [], // Список вопросов
-        };
+        rooms[room] = initializeRoom();
     }
 
-    rooms[room].players[socket.id] = { id: socket.id, name, score: 0, ready: false };
+    rooms[room].players[socket.id] = initializePlayer(socket.id, name);
 
     io.to(room).emit("user_joined", `User ${name} joined the room`);
     socket.emit("join_success", room);
+    //socket.emit("start_game");
 
 
     //SEND DATA FOR NEWLY CONNECTED
     if (rooms[room].questionCount > 0) {
-        console.log("NEWLY CONNECTED")
-        io.to(room).emit("new_question", rooms[room].currentQuestion);
-        io.to(room).emit("start_game");
+        setTimeout(() => {
+            console.log("Sending new question:", rooms[room].currentQuestion);
+            //socket.emit("new_question", rooms[room].currentQuestion);
+            socket.emit("start_game");
+        }, 800); // Задержка 100ms, чтобы дать время подготовиться
+    }
+    else {
+        console.log("No active questions at the moment.");
     }
 
     updateRoomUsers(io, room);
@@ -87,16 +112,19 @@ const evaluateResult = (io, room) => {
 
     Object.entries(players).forEach(([socketId, player]) => {
         if (currentQuestion.answer === player.answer?.answer) {
-            const timeBonus = 10;
+            let timeBonus = 10;
             player.score += 20;
 
             const timeToAnswer = Math.floor((Date.now() - currentQuestion.date) / 1000);
 
             if(timeBonus - timeToAnswer > 0){
-                player.score += timeBonus - timeToAnswer;
+                timeBonus -= timeToAnswer;
+
+                player.score += timeBonus;
+                io.to(socketId).emit("right_answer", {timeBonus:timeBonus - timeToAnswer});
             }
 
-            io.to(socketId).emit("right_answer", {timeBonus:timeBonus - timeToAnswer});
+            io.to(socketId).emit("right_answer", {timeBonus:null});
 
 
             console.log(`Player ${player} got it right! Score: ${player.score}`);
@@ -128,17 +156,6 @@ const handleNextQuestion = (io, room) => {
 const startGame = async (io, room) => {
     if (!rooms[room]) return;
 
-    
-    /*
-    {
-            players: {},
-            readyPlayers: 0,
-            answersCount: 0,
-            maxQuestions: 10,
-            questionCount: 0,
-            questions: [], // Список вопросов
-        };
-    */
     //CLEAR ALL OLD DATA
     rooms[room].answersCount = 0;
     rooms[room].questionCount = 0;
@@ -174,9 +191,28 @@ module.exports = (io) => {
 
         socket.on("create_room", ({ room, name, questionCount, category, difficulty }) => {
             if (!rooms[room]) {
-                socket.emit("room_created", room);
+
+                //validate
+                if (questionCount < 5 || questionCount > 50){
+                    socket.emit("error", "Choose number of questions from 5 to 50");
+                    return null;
+                }
+
+
+
+                //generate unique CODE
+                let newRoomKey;
+                do {
+                    newRoomKey = generateRoomKey();
+                } while (rooms[newRoomKey]);
+
+                const room = newRoomKey;
+
                 addUserToRoom(io, socket, room, name);
 
+                socket.emit("room_created", room);
+
+                //set game settings
                 rooms[room].maxQuestions = questionCount;
                 rooms[room].category = category;
                 rooms[room].difficulty = difficulty;
@@ -184,6 +220,7 @@ module.exports = (io) => {
 
             } else {
                 socket.emit("room_exists", room);
+                socket.emit("error", `Room - ${room}, is already exist `);
             }
         });
 
@@ -192,10 +229,17 @@ module.exports = (io) => {
                 addUserToRoom(io, socket, room, name);
             } else {
                 socket.emit("room_not_found", room);
+                socket.emit("error", `Room - ${room}, was not found `);
             }
         });
+        
 
         socket.on("ready", ({ room }) => {
+            if(!rooms[room]){
+                socket.emit("error", "This room not exists anymore");
+                return null;
+            };
+
             const player = rooms[room]?.players[socket.id];
             if (player) {
                 player.ready = !player.ready;
@@ -209,6 +253,8 @@ module.exports = (io) => {
         });
 
         socket.on("answer", ({ room, answer }) => {
+            if(!rooms[room]) return null;
+
             rooms[room].players[socket.id].answer = { answer: answer, time: 0 };
             rooms[room].answersCount += 1;
 

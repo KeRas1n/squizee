@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   emitSocketEvent,
-  listenSocketEvent,
 } from "../../redux/actions/socketActions";
-import { roomActions } from "../../redux/slices/room.slice";
 
 export const EnterRoomMenu = () => {
   const [inputNickname, setInputNickname] = useState<string>("");
@@ -14,9 +12,8 @@ export const EnterRoomMenu = () => {
 
   useEffect(() => {
     if(localStorage.getItem("username")){
-      setInputNickname(localStorage.getItem("username"));
+      setInputNickname((localStorage.getItem("username")) ?? '');
     }
-
 
 
     // Получаем строку параметров
@@ -27,12 +24,12 @@ export const EnterRoomMenu = () => {
 
     // Извлекаем значение параметра "id"
     const room = params.get('room');
-    setInputRoomId(room);
+    setInputRoomId((room ?? ''));
   }, [])
 
 
 
-  const joinRoom = (e) => {
+  const joinRoom = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (inputNickname && inputRoomId) {
@@ -43,25 +40,21 @@ export const EnterRoomMenu = () => {
   };
 
 
-  const createRoom = (e) => {
-    e.preventDefault();
-
-    if (inputNickname && inputRoomId) {
-      dispatch(emitSocketEvent("create_room", {room:inputRoomId, name:inputNickname}));
-    }
-  };
-
   return (
     <form className="form">
       <h1>JOIN TO ROOM</h1>
+      <label htmlFor="code">Room code</label>
       <input
+        id="code"
         type="text"
         placeholder="Enter room code"
         value={inputRoomId}
         onChange={(e) => setInputRoomId(e.target.value)}
       />
 
+      <label htmlFor="nick">Your name</label>
       <input
+        id="nick"
         type="text"
         placeholder="Your Nickname"
         value={inputNickname}

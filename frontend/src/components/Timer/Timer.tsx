@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react';
 import styles from './Timer.module.css';
 
 interface TimerProps {
-  time: number; 
+  time: number | undefined; 
   question: string; 
 }
 
 export const Timer = ({ time, question }: TimerProps) => {
-  const [timer, setTimer] = useState(time / 1000); 
+  const [timer, setTimer] = useState((time ?? 0) / 1000); 
 
   useEffect(() => {
-    setTimer(time / 1000);
+    setTimer((time ?? 0) / 1000);
   }, [time, question]);
 
   useEffect(() => {

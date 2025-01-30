@@ -2,32 +2,28 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   emitSocketEvent,
-  listenSocketEvent,
 } from "../../redux/actions/socketActions";
-import { roomActions } from "../../redux/slices/room.slice";
 
 export const CreateRoomMenu = () => {
   const [inputNickname, setInputNickname] = useState<string>("");
   const [inputRoomId, setInputRoomId] = useState<string>("");
   const [questionCount, setQuestionCount] = useState<number>(5);
   const [category, setCategory] = useState("any");
-  const [difficulty, setDifficulty] = useState();
-
+  const [difficulty, setDifficulty] = useState<string>();
 
   
   const dispatch = useDispatch();
   useEffect(() => {
       if(localStorage.getItem("username")){
-        setInputNickname(localStorage.getItem("username"));
+        setInputNickname((localStorage.getItem("username")) ?? '');
       }
     }, [])
 
-  const createRoom = (e) => {
+  const createRoom = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    if (inputNickname && inputRoomId) {
+    if (inputNickname) {
       dispatch(emitSocketEvent("create_room", {
-        room:inputRoomId, 
         name:inputNickname,
         questionCount:questionCount,
         category:category,
@@ -49,20 +45,16 @@ export const CreateRoomMenu = () => {
   return (
     <form className="form">
       <h1>... OR CREATE A NEW ONE</h1>
-      <input
-        type="text"
-        placeholder="Create a room code"
-        value={inputRoomId}
-        onChange={(e) => setInputRoomId(e.target.value)}
-      />
+      <label htmlFor="nick2">Your name</label>
       <input
         type="text"
         placeholder="Your Nickname"
+        id="nick2"
         value={inputNickname}
         onChange={(e) => setInputNickname(e.target.value)}
       />
 
-      <label for="questionCount">Number of questions</label>
+      <label htmlFor="questionCount">Number of questions</label>
       <input
         id="questionCount"
         min={5}
@@ -72,7 +64,7 @@ export const CreateRoomMenu = () => {
         onChange={(e) => setQuestionCount(Number(e.target.value))}
       />
 
-<label for="trivia_category">Select Category: </label>
+<label htmlFor="trivia_category">Select Category: </label>
 		<select className="select" value={category} onChange={e => setCategory(e.target.value)} name="trivia_category">
 			<option value="any">Any Category</option>
 			<option value="9">General Knowledge</option>
@@ -101,7 +93,7 @@ export const CreateRoomMenu = () => {
       <option value="32">Entertainment: Cartoon &amp; Animations</option>		
       </select>
 
-      <label for="difficulty">Select Difficulty: </label>
+      <label htmlFor="difficulty">Select Difficulty: </label>
 		<select className="select" value={difficulty} onChange={e => setDifficulty(e.target.value)} name="difficulty">
 			<option>Any</option>
 			<option value="easy">Easy</option>

@@ -24,26 +24,13 @@ function App() {
 
   useEffect(() => {
 
-    dispatch(connectSocket());
-
+    dispatch(connectSocket());    
 
     dispatch(
-      listenSocketEvent("user_joined", (data) => {
-        //alert(data);
+      listenSocketEvent("error", (msg) => {
+        toast.error(`Error: ${msg}`)
       })
     );
-    
-    dispatch(listenSocketEvent("room_not_found", (room) => {
-      console.log("TEST")
-      toast.error(`Room - ${room}, was not found `)
-    })
-    )
-
-    dispatch(listenSocketEvent("room_exists", (room) => {
-      toast.error(`Room - ${room}, is already exist `)
-
-    })
-    )
     
     dispatch(
       listenSocketEvent("join_success", (roomId) => {

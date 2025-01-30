@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   listenSocketEvent,
   emitSocketEvent,removeSocketEvent
 } from "../../redux/actions/socketActions";
+import { RootState } from "../../redux/store"; 
 
 import styles from './Room.module.css';
 import { roomActions } from "../../redux/slices/room.slice";
@@ -11,52 +12,66 @@ import Scoreboard from "../Scoreboard/Scoreboard";
 import { Timer } from "../Timer/Timer";
 import toast from "react-hot-toast";
 
+const colors = ['#ff2146', '#187af3', '#36c912', '#fffa54'];
+
+
+interface Question {
+  question: string;
+  options?: string[];
+  info?: {
+    time?: number;
+    questionCount?: number;
+    maxQuestions?: number;
+  };
+  category?: string;
+}
+
+
 
 const Room = () => {
 
-  const [question, setQuestion] = useState({question:"Waiting for players!"});
-  const [answered, setAnswered] = useState(false);
-  const [answerOption, setAnswerOption] = useState('');
+  const [question, setQuestion] = useState<Question>({question:"Waiting for players!"});
+  const [answered, setAnswered] = useState<boolean>(false);
+  const [answerOption, setAnswerOption] = useState<string>('');
 
   const dispatch = useDispatch();
   
   const {setGameStatus} = roomActions;
 
-  const roomId = useSelector((state) => state.room.roomId);
-  const gameStarted = useSelector((state) => state.room.gameStarted);
+  const roomId = useSelector((state:RootState) => state.room.roomId);
+  const gameStarted = useSelector((state:RootState) => state.room.gameStarted);
 
-  const colors = ['#ff2146', '#187af3', '#36c912', '#fffa54'];
+  const allColors = ['#ff2146', '#187af3', '#36c912', '#fffa54'];
+
   const [currentColor, setCurrentColor] = useState<string>('');
+  const lastColorRef = useRef<string>(colors[0]);
 
-  let filteredColorsCache = [];
 
-const assignRandomColor = () => {
-    // Обновляем кэш только когда currentColor меняется
-    if (filteredColorsCache.length === 0 || filteredColorsCache.includes(currentColor)) {
-        filteredColorsCache = colors.filter(item => item !== currentColor);
-    }
 
-    console.log(filteredColorsCache);
-    const randomIndex = Math.floor(Math.random() * filteredColorsCache.length);
-    setCurrentColor(filteredColorsCache[randomIndex]);
-};
+  const assignRandomColor = () => {
+    let newColor;
+    do {
+      newColor = colors[Math.floor(Math.random() * colors.length)];
+    } while (newColor === lastColorRef.current);
+    
+    lastColorRef.current = newColor;
+    setCurrentColor(newColor);
+  };
 
 useEffect(() => {
   assignRandomColor();
 }, [])
 
 useEffect(() => {
-  if (!roomId) return; // Проверяем, что roomId существует
+  if (!roomId) return; 
 
-  // Получаем текущий URL
-  const currentUrl = new URL(window.location);
+  const currentUrl = new URL(window.location.toString());
 
-  // Устанавливаем или обновляем параметр "room"
-  currentUrl.searchParams.set('room', roomId);
+  currentUrl.searchParams.set('room', roomId.toString());
 
-  // Обновляем URL без перезагрузки страницы
+
   window.history.replaceState({}, '', currentUrl);
-}, [roomId]); // Добавляем roomId в зависимости
+}, [roomId]); 
 
   useEffect(() => {
     
@@ -75,7 +90,7 @@ useEffect(() => {
     );
 
     dispatch(
-      listenSocketEvent("new_question", (question) => {
+      listenSocketEvent("new_question", (question:Question) => {
         console.log(question)
         setQuestion(question);
         setAnswered(false);
@@ -84,15 +99,20 @@ useEffect(() => {
     );
 
     dispatch(
-      listenSocketEvent("right_answer", ({timeBonus}) => {
+      listenSocketEvent("right_answer", ({timeBonus}:{timeBonus:boolean}) => {
         toast.success("Right answer! (+20)")
-        toast.success(`Time bonus! (+${timeBonus})`)
+
+        if(timeBonus){
+          toast.success(`Time bonus! (+${timeBonus})`)
+        }
       })
     );
     
     return () => {
       dispatch(removeSocketEvent("start_game"));
+      dispatch(removeSocketEvent("end_game"));
       dispatch(removeSocketEvent("new_question"));
+      dispatch(removeSocketEvent("right_answer"));
     };
 
   }, [dispatch]);
@@ -114,6 +134,12 @@ useEffect(() => {
     toast.success("Link copied!")
   }
   
+
+  function unescapeHtml(htmlString:string) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlString, 'text/html');
+    return doc.documentElement.textContent;
+}
 
   return (
     <div>
@@ -140,15 +166,15 @@ useEffect(() => {
             <Timer time = {question?.info?.time} question={question.question}/>
             <div className={styles.questionInfo}>
 
-              <div>{`${question.info?.questionCount + 1} / ${question.info?.maxQuestions}`}</div>
-              <div>{question.category?.replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")}</div>
+              <div>{`${question.info?.questionCount! + 1} / ${question.info?.maxQuestions}`}</div>
+              <div>{unescapeHtml((question.category ?? ''))}</div>
             </div>
             </>
           )
           }
 
           <div>
-            <h1>{question.question?.replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")}</h1>
+            <h1>{unescapeHtml(question.question)}</h1>
           </div>
 
         </div>
@@ -162,13 +188,7 @@ useEffect(() => {
 
         </div>
 
-        
-
-
       </div>
-
-
-
 
     </div>
   );
