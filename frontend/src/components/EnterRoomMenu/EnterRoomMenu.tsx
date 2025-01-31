@@ -4,7 +4,7 @@ import {
   emitSocketEvent,
 } from "../../redux/actions/socketActions";
 
-export const EnterRoomMenu = () => {
+const EnterRoomMenu = () => {
   const [inputNickname, setInputNickname] = useState<string>("");
   const [inputRoomId, setInputRoomId] = useState<string>("");
 
@@ -68,3 +68,5 @@ export const EnterRoomMenu = () => {
     </form>
   );
 };
+
+export default EnterRoomMenu;

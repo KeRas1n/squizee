@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   listenSocketEvent,
@@ -8,12 +8,11 @@ import { RootState } from "../../redux/store";
 
 import styles from './Room.module.css';
 import { roomActions } from "../../redux/slices/room.slice";
-import Scoreboard from "../Scoreboard/Scoreboard";
-import { Timer } from "../Timer/Timer";
+import Scoreboard from "../Scoreboard";
+import Timer from "../Timer";
 import toast from "react-hot-toast";
 
 const colors = ['#ff2146', '#187af3', '#36c912', '#fffa54'];
-
 
 interface Question {
   question: string;
@@ -25,8 +24,6 @@ interface Question {
   };
   category?: string;
 }
-
-
 
 const Room = () => {
 
@@ -40,8 +37,6 @@ const Room = () => {
 
   const roomId = useSelector((state:RootState) => state.room.roomId);
   const gameStarted = useSelector((state:RootState) => state.room.gameStarted);
-
-  const allColors = ['#ff2146', '#187af3', '#36c912', '#fffa54'];
 
   const [currentColor, setCurrentColor] = useState<string>('');
   const lastColorRef = useRef<string>(colors[0]);
@@ -91,7 +86,7 @@ useEffect(() => {
 
     dispatch(
       listenSocketEvent("new_question", (question:Question) => {
-        console.log(question)
+        console.log("HUYY")
         setQuestion(question);
         setAnswered(false);
         assignRandomColor();
@@ -99,10 +94,10 @@ useEffect(() => {
     );
 
     dispatch(
-      listenSocketEvent("right_answer", ({timeBonus}:{timeBonus:boolean}) => {
+      listenSocketEvent("right_answer", ({timeBonus}:{timeBonus:number }) => {
         toast.success("Right answer! (+20)")
 
-        if(timeBonus){
+        if(timeBonus > 0){
           toast.success(`Time bonus! (+${timeBonus})`)
         }
       })

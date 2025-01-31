@@ -37,8 +37,8 @@ const Scoreboard = () => {
     <div className={styles.showScoreboard} onClick={() => setShowScoreboard(!showScoreboard)}>Scoreboard</div>
 
       <div className={`${styles.userlist} ${!showScoreboard ? styles.hidden : '' }`}>
-        <h2>Players</h2>
         <h4>Room - {roomId}</h4>
+        <h2>Players</h2>
         <table className={styles.userlist_content}>
         <tr>
           <th></th>

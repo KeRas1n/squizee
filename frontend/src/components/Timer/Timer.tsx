@@ -6,7 +6,7 @@ interface TimerProps {
   question: string; 
 }
 
-export const Timer = ({ time, question }: TimerProps) => {
+const Timer = ({ time, question }: TimerProps) => {
   const [timer, setTimer] = useState((time ?? 0) / 1000); 
 
   useEffect(() => {
@@ -29,3 +29,5 @@ export const Timer = ({ time, question }: TimerProps) => {
 
   return <div className={styles.timer}>{formatTime(timer)}</div>;
 };
+
+export default Timer;

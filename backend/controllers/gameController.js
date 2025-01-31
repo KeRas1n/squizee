@@ -123,8 +123,10 @@ const evaluateResult = (io, room) => {
                 player.score += timeBonus;
                 io.to(socketId).emit("right_answer", {timeBonus:timeBonus - timeToAnswer});
             }
+            else{
+                io.to(socketId).emit("right_answer", {timeBonus:null});
+            }
 
-            io.to(socketId).emit("right_answer", {timeBonus:null});
 
 
             console.log(`Player ${player} got it right! Score: ${player.score}`);

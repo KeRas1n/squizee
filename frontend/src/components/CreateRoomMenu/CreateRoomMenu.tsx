@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   emitSocketEvent,
 } from "../../redux/actions/socketActions";
 
-export const CreateRoomMenu = () => {
+const CreateRoomMenu = () => {
   const [inputNickname, setInputNickname] = useState<string>("");
-  const [inputRoomId, setInputRoomId] = useState<string>("");
   const [questionCount, setQuestionCount] = useState<number>(5);
   const [category, setCategory] = useState("any");
   const [difficulty, setDifficulty] = useState<string>();
@@ -31,7 +30,6 @@ export const CreateRoomMenu = () => {
       }));
     }
     console.log({
-      room:inputRoomId, 
       name:inputNickname,
       questionCount:questionCount,
       category:category,
@@ -108,3 +106,4 @@ export const CreateRoomMenu = () => {
     </form>
   );
 };
+export default CreateRoomMenu;

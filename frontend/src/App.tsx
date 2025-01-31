@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { EnterRoomMenu } from './components/EnterRoomMenu/EnterRoomMenu.tsx'
-import { io, Socket } from 'socket.io-client';
-import Room from './components/Room/Room.js';
+import Room from './components/Room/Room.tsx';
 import {
   connectSocket,
   disconnectSocket,
-  emitSocketEvent,
   listenSocketEvent,
 } from "./redux/actions/socketActions.ts";
 import { useDispatch } from 'react-redux';
 import { roomActions } from './redux/slices/room.slice.ts';
 import toast, { Toaster } from 'react-hot-toast';
-import { CreateRoomMenu } from './components/CreateRoomMenu/CreateRoomMenu.tsx';
+
+import CreateRoomMenu  from './components/CreateRoomMenu';
+import EnterRoomMenu from './components/EnterRoomMenu'
 
 import Logo from '../src/assets/testLogo.png'
 
@@ -20,7 +19,7 @@ import Logo from '../src/assets/testLogo.png'
 function App() {
   const dispatch = useDispatch();
   const [inRoom, setInRoom] = useState<boolean>(false);
-  const {updatePlayers, setRoomId, setGameStatus} = roomActions;
+  const {updatePlayers, setRoomId} = roomActions;
 
   useEffect(() => {
 
@@ -62,8 +61,8 @@ function App() {
         {!inRoom
          ?
          (<>
-           <img src={Logo} width={340}/>
           <div className='menuContainer'>
+           <img src={Logo} width={340}/>
             <EnterRoomMenu/>
             <CreateRoomMenu/>
           </div>
