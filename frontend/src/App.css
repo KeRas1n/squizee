@@ -29,14 +29,18 @@ label{
   text-align: left;
 }
 
- /* The container must be positioned relative: */
+
  .select {
   position: relative;
   font-family: Arial;
+  padding: 10px;
+  font-size: 20px;
+  border-radius: 8px;
+  border: 1px solid gray;
 }
 
 .select select {
-  display: none; /*hide original SELECT element: */
+  display: none; 
 }
 
 .select-selected {

@@ -31,6 +31,7 @@ const updateRoomUsers = (io, room) => {
     if (rooms[room]) {
         io.to(room).emit("update_users", Object.values(rooms[room].players));
     }
+    console.log(`PLAYER LEFT IN A ROOM - ${(Object.values(rooms[room].players)).length}`)
 };
 
 const addUserToRoom = (io, socket, room, name) => {
@@ -263,6 +264,12 @@ module.exports = (io) => {
             if (rooms[room].answersCount === Object.keys(rooms[room].players).length) {
                 handleNextQuestion(io, room);
             }
+        });
+
+        socket.on("leaveRoom", () => {
+            console.log("DISCONNECT USERRR");
+            notifyRoomAboutDisconnect(io, socket);
+            socket.emit("left_room");
         });
 
         socket.on("disconnecting", () => {

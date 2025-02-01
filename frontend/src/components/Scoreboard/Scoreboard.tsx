@@ -32,6 +32,12 @@ const Scoreboard = () => {
     dispatch(emitSocketEvent("ready", {room:roomId}));
   }
 
+  const leaveRoom = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+
+    dispatch(emitSocketEvent("leaveRoom", {room:roomId}));
+  }
+
   return (
     <>
     <div className={styles.showScoreboard} onClick={() => setShowScoreboard(!showScoreboard)}>Scoreboard</div>
@@ -66,7 +72,15 @@ const Scoreboard = () => {
             ))}
         </table>
 
-        {!gameStarted ? (<button onClick={(e) => ready(e)}>Ready</button>) : ''}
+        {gameStarted ? ''
+          : 
+          (
+            <>
+            <button onClick={(e) => ready(e)}>Ready</button>
+            <button onClick={(e) => leaveRoom(e)}>Leave</button>
+            </>
+          ) 
+        }
         
 
       </div>

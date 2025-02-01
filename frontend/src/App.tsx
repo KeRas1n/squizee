@@ -40,6 +40,14 @@ function App() {
     );
 
     dispatch(
+      listenSocketEvent("left_room", () => {
+        setInRoom(false);
+        
+        dispatch(setRoomId(0));
+      }),
+    );
+
+    dispatch(
       listenSocketEvent("update_users", (players) => {
         console.warn(players);
         dispatch(updatePlayers(players));
