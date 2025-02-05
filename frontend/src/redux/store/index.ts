@@ -4,7 +4,7 @@ import createSocketIOMiddleware from '../middleware/socketIOMiddleware';
 import { roomReducer } from '../slices/room.slice';
 
 
-const socketIOMiddleware = createSocketIOMiddleware("http://localhost:3001/");
+const socketIOMiddleware = createSocketIOMiddleware("http://localhost:3001");
 
 export const store = configureStore({
   reducer: {

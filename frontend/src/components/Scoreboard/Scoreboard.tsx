@@ -75,12 +75,10 @@ const Scoreboard = () => {
         {gameStarted ? ''
           : 
           (
-            <>
-            <button onClick={(e) => ready(e)}>Ready</button>
-            <button onClick={(e) => leaveRoom(e)}>Leave</button>
-            </>
+            <button onClick={(e) => ready(e)}>Ready</button> 
           ) 
         }
+          <button onClick={(e) => leaveRoom(e)}>Leave</button>
         
 
       </div>

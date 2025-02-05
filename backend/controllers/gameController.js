@@ -31,7 +31,6 @@ const updateRoomUsers = (io, room) => {
     if (rooms[room]) {
         io.to(room).emit("update_users", Object.values(rooms[room].players));
     }
-    console.log(`PLAYER LEFT IN A ROOM - ${(Object.values(rooms[room].players)).length}`)
 };
 
 const addUserToRoom = (io, socket, room, name) => {
